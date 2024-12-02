@@ -29,5 +29,5 @@ class PcrClass:
         {'range': range(102,114 ), 'qetable': 'FY BUD 2025 @BUD rate'}
     ]
 
-folder_path = Path(FOLDER_PATH)
-backup_folder = BACKUP_PATH
+folder_path = Path('./1.WORKING')
+backup_folder = './2.BACKUP'
