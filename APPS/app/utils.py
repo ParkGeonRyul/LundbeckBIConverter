@@ -30,32 +30,32 @@ def remove_sheets(file_path: str, bi_sheet_name: str):
         print("파일을 찾을 수 없습니다. 경로를 확인해 주세요.")
         raise 
 
-def data_cycles(set_cycle: int, df: pd.DataFrame, melted_column: list):
+def data_cycles(sheet_name: str, df: pd.DataFrame, melted_column: list):
     all_data = pd.DataFrame()
 
-    if set_cycle == 1:
-        testa = set_cycle + 5
+    if sheet_name == CapacityClass().sheet_name:
+        testa = 6
         column_value = 5
 
-    elif set_cycle == 2:
-        testa = set_cycle + 5
+    elif sheet_name == PromotionClass().sheet_name:
+        testa = 7
         column_value = 6
 
-    elif set_cycle == 3:
+    elif sheet_name == PcrClass().sheet_name:
         column_value = 6
 
     fixed_cols = df.columns[:column_value]
     cycles = []
 
-    if set_cycle == 1 or set_cycle == 2:
+    if sheet_name != PcrClass().sheet_name:
 
         for i in range(4):
             increase_count = testa + (i * 13)
             range_count = {'range': range(increase_count, increase_count + 12), 'qetable': f'QE{i + 1}'}
             cycles.append(range_count)
 
-    elif set_cycle == 3:
-        cycles = PcrClass.cycles
+    else:
+        cycles = PcrClass().cycles
 
     for cycle in cycles:
         cycle_range = cycle['range']
@@ -64,7 +64,7 @@ def data_cycles(set_cycle: int, df: pd.DataFrame, melted_column: list):
         melted = df.melt(id_vars=fixed_cols, value_vars=date_cols, var_name='DATES', value_name='VALUE')
         melted.columns = melted_column
 
-        if set_cycle == 3:
+        if sheet_name == PcrClass().sheet_name:
             melted['VALUE'] = melted['VALUE'].apply(lambda x: 0 if x == '-' else x)
 
         melted['QETABLE'] = qetable_value
