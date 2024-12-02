@@ -2,23 +2,6 @@ from app.classes import *
 from app.utils import *
 from app.controller import *
 from tqdm import tqdm
-import time
-import psutil
-
-class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
-    def transform_excel(items: str, folder_path: str, classes: classmethod):
-        file_path = f'{folder_path}/{items}'
-        back_up(file_path)
-        result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name)
-
-        return result
-    
-    def terminate_excel(self): # 엑셀 강제종료
-        for process in psutil.process_iter(['name']):
-            if process.info['name'] == 'EXCEL.EXE':
-                process.terminate()
-                print("\n 현재 열린 모든 Excel창을 강제로 종료했습니다. \n")
-                time.sleep(1)
 
 def start(): # 작업 시작
     TransformClass().terminate_excel()
