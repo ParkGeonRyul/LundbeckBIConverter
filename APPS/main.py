@@ -4,59 +4,47 @@ from app.controller import *
 from tqdm import tqdm
 
 
-def get_integer_input(prompt):
-    while True:
-        user_input = input(prompt)
-        
-        if not user_input or not user_input.isdigit():
-            print("값이 입력되지 않았습니다.")
-            
-        else:
-            number = int(user_input)
+class TransformClass:
+    def transform_excel(items: str, folder_path: str, classes: classmethod):
+        file_path = f'{folder_path}/{items}'
+        back_up(file_path)
+        result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name)
 
-            if number > 3:
-                print("값이 올바르지 않습니다.")
-            else:
-                return number
+        return result
 
 def start():
     file_list = [f.name for f in folder_path.iterdir() if f.is_file()]
+    file_datas = ["QE", "PCR"]
+    set_class = [CapacityClass(), PromotionClass(), PcrClass()]
+    filtered_list = []
 
-    set_cycle = get_integer_input('Capacity는 1, Promotion은 2, PCR은 3입니다. 입력하여 주십시오: ')
-
-    if set_cycle == 1:
-        file_data = "QE"
-        set_class = CapacityClass()
-
-    elif set_cycle == 2:
-        file_data = "QE"
-        set_class = PromotionClass()
-
-    elif set_cycle == 3:
-        file_data = "PCR"
-        set_class = PcrClass()
-
-    filtered_list = [item for item in file_list if file_data in item]
-
+    for item in file_datas:
+        filtered_list.append([f for f in file_list if item in f])
 
     print("")
     print("※ 주의: 작업 진행 도중 프로그램이 종료되면 엑셀 파일이 손상될 수 있습니다.")
     print("")
 
-    total_files = len(filtered_list)
-        
+    total_files = len(filtered_list[0]) * 2 + len(filtered_list[1])
     complete_count = 0
 
     with tqdm(total=total_files, desc="BI 변환 작업 진행 상황", bar_format="{l_bar}{bar} [파일 {n_fmt}/{total_fmt}]") as pbar:
-        for items in filtered_list:
-            file_path = f'{folder_path}/{items}'
-            complete = transform_to_pivot(file_path, set_class, set_class.sheet_name, set_class.bi_sheet_name)
+        for classes in set_class:
+            if classes.bi_sheet_name != PcrClass().bi_sheet_name:
+                for items in filtered_list[0]:
+                    result = TransformClass.transform_excel(items, folder_path, classes)
 
-            if complete == True:
-                complete_count += 1
+                    if result == True:
+                        complete_count += 1
+                        pbar.update(1)
+            else:
+                for items in filtered_list[1]:
+                    result = TransformClass.transform_excel(items, folder_path, classes)
 
-            pbar.update(1)
+                    if result == True:
+                        complete_count += 1
+                        pbar.update(1)
 
-    print(f"총 파일 갯수: {len(filtered_list)}, 변환 성공 갯수: {complete_count}")
+    print(f"총 파일 갯수: {total_files}, 변환 성공 갯수: {complete_count}")
 
 start()

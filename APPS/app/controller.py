@@ -9,7 +9,7 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
     df = pd.read_excel(file_path, sheet_name=sheet_name)
     remove_sheets(file_path, bi_sheet_name)
 
-    if classes.sheet_name == CapacityClass().sheet_name:
+    if sheet_name == CapacityClass().sheet_name:
         df = df[~df.iloc[:, 3].astype(str).str.startswith('ZGR', na=False)]
         df = df[df.iloc[:, 2].astype(str).str.strip().str.len() == 10]
         set_melted = classes.melted
@@ -37,3 +37,5 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
 
     workbook.save(file_path)
     workbook.close()
+
+    return True
