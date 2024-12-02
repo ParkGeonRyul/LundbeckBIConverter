@@ -1,7 +1,8 @@
-from pathlib import Path
-from pandas import DataFrame
 import pandas as pd
 import os
+
+from pathlib import Path
+from pandas import DataFrame
 
 
 class CapacityClass:
@@ -15,10 +16,10 @@ class CapacityClass:
 
     def add_used_row(self, melted_df: DataFrame):
         melted_df['USED'] = melted_df.apply(
-        lambda melted: (
+        lambda row: (
             "X" if (
-                (pd.isna(melted[self.melted[3]]) and isinstance(melted[self.melted[3]], float)) or
-                not melted[self.melted[3]].startswith("5")
+                (pd.isna(row[self.melted[3]]) and isinstance(row[self.melted[3]], float)) or
+                not row[self.melted[3]].startswith("5")
             ) else "O"
         ),
         axis=1
@@ -34,18 +35,18 @@ class PromotionClass:
         self.sheet_name = 'Promotion'
         self.bi_sheet_name = 'Promotion_BI'
         self.melted = ['PROMOTION', 'CODE', 'CODE_NAME', 'PRODUCT_GROUP', 'PRODUCT_CODE', 'VERSION', 'DATES', 'VALUE']
-        self.start_column = 7 # 열 시작 컬럼
+        self.start_column = 7
         self.column_value = 6
 
     def add_used_row(self, melted_df: DataFrame):
             melted_df['USED'] = melted_df.apply(
-            lambda melted: (
+            lambda row: (
                 "X" if (
-                    "/" not in melted[self.melted[1]] or
-                    melted[self.melted[2]] == "Admin Common" or
-                    melted[self.melted[3]] == "All Product Groups" or
-                    (pd.isna(melted[self.melted[4]]) and isinstance(melted[self.melted[4]], float)) or
-                    not melted[self.melted[4]].startswith("5")
+                    "/" not in row[self.melted[1]] or
+                    row[self.melted[2]] == "Admin Common" or
+                    row[self.melted[3]] == "All Product Groups" or
+                    (pd.isna(row[self.melted[4]]) and isinstance(row[self.melted[4]], float)) or
+                    not row[self.melted[4]].startswith("5")
                 ) else "O"
             ),
             axis=1
@@ -55,7 +56,7 @@ class PcrClass:
     def __init__(self):
         self.sheet_name = 'PCR_Power'
         self.bi_sheet_name = 'PCR_POWERBI'
-        self.melted = ['COA', 'Account Group','Function1#','Product Grp','Category4', 'DATES', 'VALUE', 'QETABLE']
+        self.melted = ['COA', 'Account Group','Function1#','Product Grp','Category4', 'DATES', 'VALUE']
         self.cycles = [
             {'range': range(11, 23), 'qetable': 'FY ACT 2023 @BUD rate'},
             {'range': range(24, 36), 'qetable': 'FY BUD 2024 @BUD rate'},
@@ -66,10 +67,51 @@ class PcrClass:
             {'range': range(89, 101), 'qetable': 'YTD ACT 2024 @BUD rate'},
             {'range': range(102,114 ), 'qetable': 'FY BUD 2025 @BUD rate'}
         ]
-        self.column_value = 6
+        self.column_value = 5
 
-    def update_value_row(self, melted: DataFrame):
+    def update_row(self, melted: DataFrame, cycles: list):
         melted['VALUE'] = melted['VALUE'].apply(lambda x: 0 if x == '-' else x)
+
+    def add_used_row(self, melted_df: DataFrame):
+        melted_df['Category5'] = melted_df.apply(
+            lambda row: (
+                row[self.melted[0]] +
+                (f"_{row[self.melted[1]]}" if not pd.isna(row[self.melted[1]]) else "") +
+                (f"_{row[self.melted[2]]}" if not pd.isna(row[self.melted[2]]) else "") +
+                (f"_{row[self.melted[3]]}" if not pd.isna(row[self.melted[3]]) else "") +
+                (f"_{row[self.melted[4]]}" if not pd.isna(row[self.melted[4]]) else "")
+            ),
+            axis=1
+        )
+
+        melted_df['USED'] = melted_df['Category5'].apply(
+            lambda row: "X" if row in [
+                "Sales_Net Sales",
+                "Sales_Gross Sales",
+                "Sales_Sales Adjustments",
+                "Production Cost",
+                "Production Cost_Manufacuring Costs",
+                "Production Cost_Other Variable Cost",
+                "SG&A",
+                "SG&A_Total Promotion Cost",
+                "SG&A_Total Promotion Cost_Promotion Cost",
+                "SG&A_Total Promotion Cost_Medical Affairs activity cost",
+                "SG&A_Total Sales Cost",
+                "Profit Centre Result_Profit Centre Result"
+            ] else "O"
+        )
+
+        melted_df['USED'] = melted_df.apply(
+            lambda row: "X" if (
+                row['USED'] == "O" and
+                (
+                    row[self.melted[1]] == "Net Sales incl. other revenue" or
+                    row[self.melted[2]] == "Pricing and Market Access" or
+                    row[self.melted[3]] == "All Product Groups"
+                )
+            ) else row['USED'],
+            axis=1
+        )
 
 folder_path = Path('./1.WORKING')
 backup_folder = './2.BACKUP'
