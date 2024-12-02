@@ -71,6 +71,6 @@ class PcrClass:
     def update_value_row(self, melted: DataFrame):
         melted['VALUE'] = melted['VALUE'].apply(lambda x: 0 if x == '-' else x)
 
-folder_path = Path('./1. WORKING')
-backup_folder = './2. BACKUP'
-result_folder = './3. RESULT'
+folder_path = Path('./1.WORKING')
+backup_folder = './2.BACKUP'
+result_folder = './3.RESULT'
