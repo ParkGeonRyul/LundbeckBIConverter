@@ -2,49 +2,57 @@ from app.classes import *
 from app.utils import *
 from app.controller import *
 from tqdm import tqdm
+import time
+import psutil
 
-
-class TransformClass:
+class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
     def transform_excel(items: str, folder_path: str, classes: classmethod):
         file_path = f'{folder_path}/{items}'
         back_up(file_path)
         result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name)
 
         return result
+    
+    def terminate_excel(self): # 엑셀 강제종료
+        for process in psutil.process_iter(['name']):
+            if process.info['name'] == 'EXCEL.EXE':
+                process.terminate()
+                print("\n 현재 열린 모든 Excel창을 강제로 종료했습니다. \n")
+                time.sleep(1)
 
-def start():
-    file_list = [f.name for f in folder_path.iterdir() if f.is_file()]
+def start(): # 작업 시작
+    TransformClass().terminate_excel()
+
+    file_list = [f.name for f in folder_path.iterdir() if f.is_file()] # 1. WORKING 폴더 내에 파일 감지
     file_datas = ["QE", "PCR"]
     set_class = [CapacityClass(), PromotionClass(), PcrClass()]
     filtered_list = []
 
     for item in file_datas:
-        filtered_list.append([f for f in file_list if item in f])
+        filtered_list.append([f for f in file_list if item in f]) # QE, PCR로 파일 필터링 후 각개로 작동하게 로직 구현
 
-    print("")
-    print("※ 주의: 작업 진행 도중 프로그램이 종료되면 엑셀 파일이 손상될 수 있습니다.")
-    print("")
+    print("\n ※ 주의: 작업 진행 도중 프로그램이 종료되면 엑셀 파일이 손상될 수 있습니다. \n")
 
-    total_files = len(filtered_list[0]) * 2 + len(filtered_list[1])
+    total_count = len(filtered_list[0]) * 2 + len(filtered_list[1]) # 작업 상황 관련 총 횟수
     complete_count = 0
 
-    with tqdm(total=total_files, desc="BI 변환 작업 진행 상황", bar_format="{l_bar}{bar} [파일 {n_fmt}/{total_fmt}]") as pbar:
-        for classes in set_class:
-            if classes.bi_sheet_name != PcrClass().bi_sheet_name:
+    with tqdm(total=total_count, desc="BI 변환 작업 진행 상황", bar_format="{l_bar}{bar} [변환 {n_fmt}/{total_fmt}]") as pbar: # 변환 완료 횟수 퍼센테이지 게이지로 활성화
+        for classes in set_class: # app.classes 내부 파일 class 변수 작업
+            if classes.bi_sheet_name != PcrClass().bi_sheet_name: # QE파일 작업
                 for items in filtered_list[0]:
                     result = TransformClass.transform_excel(items, folder_path, classes)
 
-                    if result == True:
+                    if result == True: # 성공 횟수 작업
                         complete_count += 1
                         pbar.update(1)
             else:
-                for items in filtered_list[1]:
+                for items in filtered_list[1]: # PCR파일 작업
                     result = TransformClass.transform_excel(items, folder_path, classes)
 
                     if result == True:
                         complete_count += 1
                         pbar.update(1)
 
-    print(f"총 파일 갯수: {total_files}, 변환 성공 갯수: {complete_count}")
+    print(f"총 횟수: {total_count}, 변환 성공 갯수: {complete_count}")
 
 start()
