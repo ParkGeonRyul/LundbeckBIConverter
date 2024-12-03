@@ -21,18 +21,19 @@ def start(): # 작업 시작
 
     with tqdm(total=total_count, desc="BI 변환 작업 진행 상황", bar_format="{l_bar}{bar} [변환 {n_fmt}/{total_fmt}]") as pbar: # 변환 완료 횟수 퍼센테이지 게이지로 활성화
         for classes in set_class: # app.classes 내부 파일 class 변수 작업
-            if classes.bi_sheet_name != PcrClass().bi_sheet_name: # QE파일 작업
-                for items in filtered_list[0]:
-                    result = TransformClass.transform_excel(items, folder_path, classes)
-
-                    if result == True: # 성공 횟수 작업
-                        complete_count += 1
-                        pbar.update(1)
-            else:
+            if classes.bi_sheet_name == PcrClass().bi_sheet_name:
                 for items in filtered_list[1]: # PCR파일 작업
                     result = TransformClass.transform_excel(items, folder_path, classes)
 
                     if result == True:
+                        complete_count += 1
+                        pbar.update(1)
+            
+            else:
+                for items in filtered_list[0]: # QE파일 작업
+                    result = TransformClass.transform_excel(items, folder_path, classes)
+
+                    if result == True: # 성공 횟수 작업
                         complete_count += 1
                         pbar.update(1)
 
