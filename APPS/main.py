@@ -24,19 +24,16 @@ def start(): # 작업 시작
         for classes in set_class: # app.classes 내부 파일 class 변수 작업
             if classes.bi_sheet_name == PcrClass().bi_sheet_name:
                 for items in filtered_list[1]: # PCR파일 작업
-                    result = TransformClass.transform_excel(items, folder_path, classes)
-
-                    if result == True:
-                        complete_count += 1
-                        pbar.update(1)
+                    TransformClass.transform_excel(items, folder_path, classes)
+                    complete_count += 1
+                    pbar.update(1)
             
             else:
                 for items in filtered_list[0]: # QE파일 작업
-                    result = TransformClass.transform_excel(items, folder_path, classes)
+                    TransformClass.transform_excel(items, folder_path, classes)
 
-                    if result == True: # 성공 횟수 작업
-                        complete_count += 1
-                        pbar.update(1)
+                    complete_count += 1
+                    pbar.update(1)
 
     print(f"총 횟수: {total_count}, 변환 성공 갯수: {complete_count}")
 
