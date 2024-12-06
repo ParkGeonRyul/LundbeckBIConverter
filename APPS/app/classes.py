@@ -18,8 +18,7 @@ class CapacityClass:
         melted_df['USED'] = melted_df.apply(
         lambda row: (
             "X" if (
-                (pd.isna(row[self.melted[3]]) and isinstance(row[self.melted[3]], float)) or
-                not row[self.melted[3]].startswith("5")
+                row[self.melted[3]] == "Result"
             ) else "O"
         ),
         axis=1

@@ -24,7 +24,14 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
 
 
 def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi_sheet_name: str): # 변환 Controller
-    df = pd.read_excel(file_path, sheet_name=sheet_name)
+    try:
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
+        
+    except ValueError as e:
+        if f"Worksheet named '{sheet_name}' not found" in str(e):
+
+            return False
+
     remove_sheets(file_path, bi_sheet_name) # Excel 시트에 bi_sheet_name으로 되어있는 Sheet 삭제
 
     if hasattr(classes, 'set_df'):
