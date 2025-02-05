@@ -10,8 +10,15 @@ from app.utils import *
 class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
     def transform_excel(items: str, folder_path: str, classes: classmethod):
         file_path = f'{folder_path}/{items}'
-        back_up(file_path)
-        result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name)
+        split_item= items.split(" ")
+        
+        try:
+            file_year = int(split_item[0])
+
+        except:
+            file_year = None
+
+        result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name, file_year)
 
         return result
     
@@ -23,7 +30,7 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
                 time.sleep(1)
 
 
-def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi_sheet_name: str): # 변환 Controller
+def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi_sheet_name: str, file_year: int | None = None): # 변환 Controller
     try:
         df = pd.read_excel(file_path, sheet_name=sheet_name)
         
@@ -39,7 +46,7 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
 
     set_melted = classes.melted
 
-    all_data = data_cycles(classes, sheet_name, df, set_melted) # Sheet 변환 사이클 돌리기
+    all_data = data_cycles(classes, sheet_name, df, set_melted, file_year) # Sheet 변환 사이클 돌리기
 
     with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer: # classes.py 에 있는 bi_sheet_name 이름으로 새 Sheet 작성
         all_data.to_excel(writer, sheet_name=bi_sheet_name, index=False)
@@ -51,7 +58,7 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
 
     return True
 
-def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_column: list):
+def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_column: list, file_year: int | None = None):
     all_data = pd.DataFrame() # 빈 데이터프레임 생성
 
     if hasattr(classes, 'start_column'):
@@ -70,17 +77,16 @@ def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_
             cycles.append(range_count)
 
     else:
-        cycles = classes.cycles # PCR은 열 이름이 계속 달라져서 하드코딩(추후 변경 예정)
+        cycles = classes.cycles(file_year) # PCR은 열 이름이 계속 달라져서 하드코딩(추후 변경 예정)
 
     for cycle in cycles:
         cycle_range = cycle['range'] # 컬럼 범위 불러오기
         qetable_value = cycle['qetable'] # qe테이블 값 변수저장
         date_cols = df.columns[cycle_range] # 날짜 컬럼 생성
         melted = df.melt(id_vars=fixed_cols, value_vars=date_cols, var_name='DATES', value_name='VALUE')
-        #  pcr_power_melted = pcr_power_df.melt(id_vars=fixed_cols, value_vars=date_cols, var_name='DATES', value_name='VALUE')
 
         if hasattr(classes, 'update_row'): # PCR일 경우 데이터 중 -값을 0으로 치환
-            classes.update_row(melted, cycles)
+            classes.update_row(melted)
 
         melted['VALUE'] = pd.to_numeric(melted['VALUE'], errors='coerce').fillna(0).astype(int) # VALUE값 중 Null 값 0으로 치환
         melted.columns = melted_column

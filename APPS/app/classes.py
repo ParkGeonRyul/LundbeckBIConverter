@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 
+from datetime import datetime
 from pathlib import Path
 from pandas import DataFrame
 
@@ -53,22 +54,31 @@ class PromotionClass:
 
 class PcrClass:
     def __init__(self):
+
         self.sheet_name = 'PCR_Power'
         self.bi_sheet_name = 'PCR_POWERBI'
         self.melted = ['COA', 'Account Group','Function1#','Product Grp','Category4', 'DATES', 'VALUE']
-        self.cycles = [
-            {'range': range(11, 23), 'qetable': 'FY ACT 2023 @BUD rate'},
-            {'range': range(24, 36), 'qetable': 'FY BUD 2024 @BUD rate'},
-            {'range': range(37, 49), 'qetable': '24 QE1'},
-            {'range': range(50, 62), 'qetable': '24 QE2'},
-            {'range': range(63, 75), 'qetable': '24 QE3'},
-            {'range': range(76, 88), 'qetable': '24 QE4'},
-            {'range': range(89, 101), 'qetable': 'YTD ACT 2024 @BUD rate'},
-            {'range': range(102,114 ), 'qetable': 'FY BUD 2025 @BUD rate'}
-        ]
         self.column_value = 5
 
-    def update_row(self, melted: DataFrame, cycles: list):
+    def cycles(self, year: int | None = None):
+        
+        if year is None:
+            year = datetime.now().year
+        short_year = str(year)[-2:]
+        cycles = [
+            {'range': range(11, 23), 'qetable': f'FY ACT {year - 1} @BUD rate'},
+            {'range': range(24, 36), 'qetable': f'FY BUD {year - 1} @BUD rate'},
+            {'range': range(37, 49), 'qetable': f'{short_year} QE1'},
+            {'range': range(50, 62), 'qetable': f'{short_year} QE2'},
+            {'range': range(63, 75), 'qetable': f'{short_year} QE3'},
+            {'range': range(76, 88), 'qetable': f'{short_year} QE4'},
+            {'range': range(89, 101), 'qetable': f'YTD ACT {year} @BUD rate'},
+            {'range': range(102,114 ), 'qetable': f'FY BUD {year + 1} @BUD rate'}
+        ]
+
+        return cycles
+
+    def update_row(self, melted: DataFrame):
         melted['VALUE'] = melted['VALUE'].apply(lambda x: 0 if x == '-' else x)
 
     def add_used_row(self, melted_df: DataFrame):
