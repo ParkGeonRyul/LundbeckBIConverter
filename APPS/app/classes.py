@@ -22,7 +22,7 @@ class CapacityClass:
                 row[self.melted[3]] == "Result"
             ) else "O"
         ),
-        axis=1
+        axis = 1
     )
         
     def set_df(self, df: DataFrame):
@@ -49,12 +49,11 @@ class PromotionClass:
                     not row[self.melted[4]].startswith("5")
                 ) else "O"
             ),
-            axis=1
+            axis = 1
         )
 
 class PcrClass:
     def __init__(self):
-
         self.sheet_name = 'PCR_Power'
         self.bi_sheet_name = 'PCR_POWERBI'
         self.melted = ['COA', 'Account Group','Function1#','Product Grp','Category4', 'DATES', 'VALUE']
@@ -90,7 +89,7 @@ class PcrClass:
                 (f"_{row[self.melted[3]]}" if not pd.isna(row[self.melted[3]]) else "") +
                 (f"_{row[self.melted[4]]}" if not pd.isna(row[self.melted[4]]) else "")
             ),
-            axis=1
+            axis = 1
         )
 
         melted_df['USED'] = melted_df['Category5'].apply(
@@ -119,7 +118,7 @@ class PcrClass:
                     row[self.melted[3]] == "All Product Groups"
                 )
             ) else row['USED'],
-            axis=1
+            axis = 1
         )
 
 folder_path = Path('./1.WORKING')

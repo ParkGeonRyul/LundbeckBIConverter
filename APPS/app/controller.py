@@ -18,6 +18,8 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
         except:
             file_year = None
 
+        back_up(file_path)
+        
         result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name, file_year)
 
         return result
