@@ -18,8 +18,7 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
         except:
             file_year = None
 
-        back_up(file_path)
-        
+        back_up(file_path)        
         result = transform_to_pivot(file_path, classes, classes.sheet_name, classes.bi_sheet_name, file_year)
 
         return result
@@ -30,7 +29,6 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
                 process.terminate()
                 print("\n 현재 열린 모든 Excel창을 강제로 종료했습니다. \n")
                 time.sleep(1)
-
 
 def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi_sheet_name: str, file_year: int | None = None): # 변환 Controller
     try:
@@ -44,7 +42,7 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
     remove_sheets(file_path, bi_sheet_name) # Excel 시트에 bi_sheet_name으로 되어있는 Sheet 삭제
 
     if hasattr(classes, 'set_df'):
-        classes.set_df(df)
+        df = classes.set_df(df)
 
     set_melted = classes.melted
 
@@ -90,11 +88,9 @@ def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_
         if hasattr(classes, 'update_row'): # PCR일 경우 데이터 중 -값을 0으로 치환
             classes.update_row(melted)
 
-        melted['VALUE'] = pd.to_numeric(melted['VALUE'], errors='coerce').fillna(0).astype(int) # VALUE값 중 Null 값 0으로 치환
         melted.columns = melted_column
         melted['QETABLE'] = qetable_value # QETABLE 열의 행 값 설정
-        classes.add_used_row(melted) # USED 열 추가 및 행 값 추가
-        
+        classes.add_used_row(melted) # USED 열 추가 및 행 값 추가       
         all_data = pd.concat([all_data, melted], ignore_index=True)
     
     return all_data
