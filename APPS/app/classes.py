@@ -29,6 +29,7 @@ class CapacityClass:
         df = df[~df.iloc[:, 3].astype(str).str.startswith('ZGR', na=False)]
         df = df[df.iloc[:, 2].astype(str).str.strip().str.len() == 10]
 
+        return df
 
 class PromotionClass:
     def __init__(self):
@@ -66,7 +67,7 @@ class PcrClass:
         short_year = str(year)[-2:]
         cycles = [
             {'range': range(11, 23), 'qetable': f'FY ACT {year - 1} @BUD rate'},
-            {'range': range(24, 36), 'qetable': f'FY BUD {year - 1} @BUD rate'},
+            {'range': range(24, 36), 'qetable': f'FY BUD {year} @BUD rate'},
             {'range': range(37, 49), 'qetable': f'{short_year} QE1'},
             {'range': range(50, 62), 'qetable': f'{short_year} QE2'},
             {'range': range(63, 75), 'qetable': f'{short_year} QE3'},

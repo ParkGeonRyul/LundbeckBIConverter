@@ -43,7 +43,7 @@ def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi
     remove_sheets(file_path, bi_sheet_name) # Excel 시트에 bi_sheet_name으로 되어있는 Sheet 삭제
 
     if hasattr(classes, 'set_df'):
-        classes.set_df(df)
+        df = classes.set_df(df)
 
     set_melted = classes.melted
 
@@ -89,7 +89,6 @@ def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_
         if hasattr(classes, 'update_row'): # PCR일 경우 데이터 중 -값을 0으로 치환
             classes.update_row(melted)
 
-        melted['VALUE'] = pd.to_numeric(melted['VALUE'], errors='coerce').fillna(0).astype(int) # VALUE값 중 Null 값 0으로 치환
         melted.columns = melted_column
         melted['QETABLE'] = qetable_value # QETABLE 열의 행 값 설정
         classes.add_used_row(melted) # USED 열 추가 및 행 값 추가
