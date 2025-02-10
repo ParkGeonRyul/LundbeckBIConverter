@@ -30,7 +30,6 @@ class TransformClass: # excel 파일 경로 설정 및 백업 생성 class화
                 print("\n 현재 열린 모든 Excel창을 강제로 종료했습니다. \n")
                 time.sleep(1)
 
-
 def transform_to_pivot(file_path: str, classes: classmethod, sheet_name: str, bi_sheet_name: str, file_year: int | None = None): # 변환 Controller
     try:
         df = pd.read_excel(file_path, sheet_name=sheet_name)
@@ -91,8 +90,7 @@ def data_cycles(classes: classmethod, sheet_name: str, df: pd.DataFrame, melted_
 
         melted.columns = melted_column
         melted['QETABLE'] = qetable_value # QETABLE 열의 행 값 설정
-        classes.add_used_row(melted) # USED 열 추가 및 행 값 추가
-        
+        classes.add_used_row(melted) # USED 열 추가 및 행 값 추가       
         all_data = pd.concat([all_data, melted], ignore_index=True)
     
     return all_data
