@@ -3,7 +3,6 @@ from app.utils import *
 from app.controller import *
 from tqdm import tqdm
 
-
 def start(): # 작업 시작
     TransformClass().terminate_excel()
 
